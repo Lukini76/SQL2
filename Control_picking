@@ -1,0 +1,118 @@
+SELECT
+    base.nfolio                 nfolio,
+    venta.org_name_short        venta,
+    estado.xestado              estado,
+    abastece.org_name_short     AS abastece,
+    problema.xproblema          AS xproblema,
+    etapa_despacho.cetapa_dsp   AS etapa_desp,
+    provincia_2.xprovincia,
+    provincia_1.xcomuna,
+    sector_2.xsector,
+    base.dcreacion,
+    base.dreparto,
+    base.dpactada,
+    etapa_despacho.dfecha,
+    sector_1.csector,
+    base.cproblema,
+    base.cestado,
+    base.org_lvl_child_d,
+    base.bdspprv,
+    base.bret_despacho
+FROM
+    srxfa.f12hdref                                                                                                                            base
+    INNER JOIN (
+        SELECT
+            srxfa.orgmstee.org_name_short,
+            srxfa.orgmstee.org_lvl_child
+        FROM
+            srxfa.orgmstee
+    )                                                  venta ON base.org_lvl_child = venta.org_lvl_child
+    INNER JOIN (
+        SELECT
+            srxfa.f12estcf.cestado,
+            srxfa.f12estcf.xestado
+        FROM
+            srxfa.f12estcf
+    )                                                               estado ON estado.cestado = base.cestado
+    INNER JOIN (
+        SELECT
+            srxfa.orgmstee.org_lvl_child,
+            srxfa.orgmstee.org_name_short
+        FROM
+            srxfa.orgmstee
+    )                                                  abastece ON base.org_lvl_child_d = abastece.org_lvl_child
+    LEFT JOIN (
+        SELECT
+            *
+        FROM
+            srxfa.f12procf
+    )                                                                                                            problema ON problema.cproblema = base.cproblema
+    INNER JOIN (
+        SELECT
+            srxfa.f12ecdef.nfolio,
+            srxfa.f12ecdef.cetapa_dsp,
+            srxfa.f12ecdef.dfecha
+        FROM
+            srxfa.f12ecdef
+        WHERE
+            srxfa.f12ecdef.dfecha > ( SYSDATE ) - 365
+    ) etapa_despacho ON base.nfolio = etapa_despacho.nfolio
+    INNER JOIN (
+        SELECT
+            srxfa.falcmnef.ccomuna,
+            srxfa.falcmnef.cprovincia,
+            srxfa.falcmnef.xcomuna
+        FROM
+            srxfa.falcmnef
+    )                                    provincia_1 ON base.ccomuna = provincia_1.ccomuna
+    INNER JOIN (
+        SELECT
+            srxfa.falprver.cprovincia,
+            srxfa.falprver.xprovincia
+        FROM
+            srxfa.falprver
+    )                                                         provincia_2 ON provincia_1.cprovincia = provincia_2.cprovincia
+    INNER JOIN (
+        SELECT
+            srxfa.f12cosef.org_lvl_child,
+            srxfa.f12cosef.csector,
+            srxfa.f12cosef.ccomuna
+        FROM
+            srxfa.f12cosef
+    )                                 sector_1 ON base.org_lvl_child_d = sector_1.org_lvl_child
+                  AND base.ccomuna = sector_1.ccomuna
+    INNER JOIN (
+        SELECT
+            srxfa.f12secef.org_lvl_child,
+            srxfa.f12secef.csector,
+            srxfa.f12secef.xsector
+        FROM
+            srxfa.f12secef
+    )                                 sector_2 ON sector_1.org_lvl_child = sector_2.org_lvl_child
+                  AND sector_1.csector = sector_2.csector
+WHERE
+    ( estado.xestado = 'DIGITADO'
+      AND etapa_despacho.cetapa_dsp = '5'
+      AND base.cestado = '3'
+      AND base.org_lvl_child_d = 2
+      AND base.bdspprv = 'F'
+      AND base.bret_despacho = 'S' )
+    OR ( base.cestado = '1'
+         AND base.org_lvl_child_d = 5 )
+    OR ( base.org_lvl_child_d = 8 )
+    OR ( base.org_lvl_child_d = 82 )
+    OR ( base.org_lvl_child_d = 84 )
+    OR ( base.org_lvl_child_d = 85 )
+    OR ( base.org_lvl_child_d = 99 )
+    OR ( base.org_lvl_child_d = 335 )
+    OR ( base.org_lvl_child_d = 442 )
+    OR ( base.org_lvl_child_d = 458 )
+    OR ( base.org_lvl_child_d = 443 )
+    OR ( base.org_lvl_child_d = 444 )
+    OR ( base.org_lvl_child_d = 445 )
+    OR ( base.org_lvl_child_d = 452 )
+    OR ( base.org_lvl_child_d = 453 )
+    OR ( base.org_lvl_child_d = 454 )
+    OR ( base.org_lvl_child_d = 455 )
+    OR ( base.org_lvl_child_d = 501 )
+    OR ( base.org_lvl_child_d = 457 )
